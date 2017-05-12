@@ -1,25 +1,16 @@
 var express = require("express"),
-    app = express(),
-    bodyParser = require("body-parser"),
-    os = require('os'),
-    data = {
-        ipaddress: "",
-        language:"",
-        software: os.platform()
+    app = express();
+
+    
+app.get("/", function(req, res) {
+    //console.log(req.headers);
+    var obj = req.headers;
+    var data = {
+        ipaddress: obj["x-forwarded-for"],
+        language:obj["accept-language"].slice(0, 5),
+        software: obj["user-agent"].slice(13, 27)
     };
-    
-app.use(bodyParser.urlencoded({ extended: false }));
-    
-require('dns').lookup(os.hostname(), function (err, add, fam) {
-    if(err) throw err;
-    console.log('addr: '+add);
-    data.ipaddress = add;
-    app.get("/", function(req, res) {
-        //var language = JSON.parse(req.headers["accept-language"]);
-        var arr = req.headers["accept-language"].split(',');
-        data.language =  arr[0];
-        res.send(req.headers);
-    });
+    res.send(data);
 });
     
 app.listen(process.env.PORT, process.env.ID, function() {
